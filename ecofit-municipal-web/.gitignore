@@ -1,0 +1,13 @@
+/ecofit-municipal-api/.venv/
+/ecofit-municipal-web/node_modules/
+/ecofit-municipal-web/.env
+/.venv/
+/venv/
+**/__pycache__/
+*.pyc
+.env
+dist/
+build/
+.vscode/
+.idea/
+.DS_Store

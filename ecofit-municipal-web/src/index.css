@@ -1,0 +1,676 @@
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --bg: 240 247 244;            /* #F0F7F4 */
+  --bg-soft: 232 245 232;       /* #E8F5E8 */
+  --surface: 255 255 255;       /* #FFFFFF */
+  --surface-soft: 241 248 233;  /* #F1F8E9 */
+
+  --primary: 45 106 79;         /* #2D6A4F */
+  --primary-2: 46 125 50;       /* #2E7D32 */
+  --secondary: 64 145 108;      /* #40916C */
+  --accent: 116 198 157;        /* #74C69D */
+
+  --text: 27 67 50;             /* #1B4332 */
+  --text-soft: 82 121 111;      /* #52796F */
+  --muted: 102 102 102;         /* #666666 */
+  --border: 224 234 229;        /* #E0EAE5 */
+
+  --success: 76 175 80;         /* #4CAF50 */
+  --warning: 255 152 0;         /* #FF9800 */
+  --danger: 217 4 41;           /* #D90429 */
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 2px 8px rgba(27, 67, 50, 0.06);
+  --shadow-md: 0 8px 24px rgba(27, 67, 50, 0.08);
+  --shadow-lg: 0 16px 40px rgba(27, 67, 50, 0.10);
+
+  --page-max: 1440px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  padding: 0;
+}
+
+body {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ---------- APP SHELL ---------- */
+
+.ef-page {
+  min-height: 100vh;
+  background: rgb(var(--bg));
+}
+
+.ef-page-inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.ef-topnav {
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.ef-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.ef-brand-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgb(var(--primary-2));
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.ef-brand-text {
+  min-width: 0;
+}
+
+.ef-brand-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: rgb(var(--text));
+}
+
+.ef-brand-subtitle {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: rgb(var(--text-soft));
+}
+
+.ef-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ef-nav-link {
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border));
+  color: rgb(var(--text));
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.ef-nav-link:hover {
+  border-color: rgb(var(--secondary));
+  transform: translateY(-1px);
+}
+
+.ef-nav-link.active {
+  background: rgb(var(--text));
+  border-color: rgb(var(--text));
+  color: white;
+}
+
+/* ---------- TYPOGRAPHY ---------- */
+
+.ef-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--secondary));
+}
+
+.ef-page-title {
+  margin: 8px 0 4px;
+  font-size: 38px;
+  line-height: 1.05;
+  font-weight: 800;
+  color: rgb(var(--text));
+}
+
+.ef-page-subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: rgb(var(--text-soft));
+}
+
+.ef-section-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 800;
+  color: rgb(var(--text));
+}
+
+.ef-muted {
+  color: rgb(var(--text-soft));
+}
+
+.ef-small {
+  font-size: 13px;
+}
+
+/* ---------- CARDS ---------- */
+
+.ef-card {
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.ef-card-soft {
+  background: rgb(var(--surface-soft));
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.ef-card-pad {
+  padding: 22px;
+}
+
+.ef-grid-2 {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 24px;
+}
+
+.ef-grid-2-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.ef-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ef-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ---------- FORMS ---------- */
+
+.ef-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ef-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ef-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgb(var(--text-soft));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ef-input,
+.ef-select,
+.ef-textarea {
+  width: 100%;
+  border: 1px solid rgb(var(--border));
+  background: rgb(var(--surface));
+  color: rgb(var(--text));
+  border-radius: 14px;
+  padding: 14px 16px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.ef-input::placeholder,
+.ef-textarea::placeholder {
+  color: rgb(var(--muted));
+}
+
+.ef-input:focus,
+.ef-select:focus,
+.ef-textarea:focus {
+  border-color: rgb(var(--secondary));
+  box-shadow: 0 0 0 4px rgba(64, 145, 108, 0.12);
+}
+
+.ef-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ef-password-wrap {
+  position: relative;
+}
+
+.ef-password-input {
+  padding-right: 54px;
+}
+
+.ef-eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* ---------- BUTTONS ---------- */
+
+.ef-btn {
+  border: none;
+  background: rgb(var(--primary-2));
+  color: white;
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: 0.2s ease;
+}
+
+.ef-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+.ef-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ef-btn-secondary {
+  border: 1px solid rgb(var(--border));
+  background: rgb(var(--surface));
+  color: rgb(var(--text));
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.ef-btn-secondary:hover {
+  border-color: rgb(var(--secondary));
+  transform: translateY(-1px);
+}
+
+.ef-btn-link {
+  background: transparent;
+  border: none;
+  color: rgb(var(--primary-2));
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ---------- STATUS / ALERT ---------- */
+
+.ef-alert {
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ef-alert-error {
+  background: rgba(217, 4, 41, 0.08);
+  color: rgb(var(--danger));
+  border: 1px solid rgba(217, 4, 41, 0.18);
+}
+
+.ef-alert-success {
+  background: rgba(76, 175, 80, 0.10);
+  color: rgb(var(--success));
+  border: 1px solid rgba(76, 175, 80, 0.18);
+}
+
+/* ---------- AUTH ---------- */
+
+.ef-auth-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(116, 198, 157, 0.14), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(64, 145, 108, 0.10), transparent 30%),
+    rgb(var(--bg));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+}
+
+.ef-auth-shell {
+  width: 100%;
+  max-width: 1180px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 24px;
+}
+
+.ef-auth-left {
+  background: linear-gradient(145deg, rgb(var(--primary-2)), rgb(var(--primary)));
+  color: white;
+  border-radius: 28px;
+  padding: 42px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.ef-auth-left::before,
+.ef-auth-left::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ef-auth-left::before {
+  width: 260px;
+  height: 260px;
+  top: -80px;
+  right: -60px;
+}
+
+.ef-auth-left::after {
+  width: 200px;
+  height: 200px;
+  bottom: -70px;
+  left: -40px;
+}
+
+.ef-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.ef-auth-brand-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.14);
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  backdrop-filter: blur(6px);
+}
+
+.ef-auth-brand-text h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.ef-auth-brand-text p {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ef-auth-hero {
+  margin-top: 52px;
+  position: relative;
+  z-index: 1;
+}
+
+.ef-auth-hero-kicker {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ef-auth-hero-title {
+  margin: 14px 0 12px;
+  font-size: 46px;
+  line-height: 1.08;
+  font-weight: 800;
+}
+
+.ef-auth-hero-text {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.7;
+  max-width: 560px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ef-auth-points {
+  margin-top: 28px;
+  display: grid;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.ef-auth-point {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 14px 16px;
+  backdrop-filter: blur(4px);
+}
+
+.ef-auth-point-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.16);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.ef-auth-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ef-auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border));
+  border-radius: 28px;
+  box-shadow: var(--shadow-lg);
+  padding: 34px;
+}
+
+.ef-auth-card-header {
+  margin-bottom: 24px;
+}
+
+.ef-auth-card-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: rgb(var(--text));
+}
+
+.ef-auth-card-subtitle {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: rgb(var(--text-soft));
+}
+
+.ef-auth-footer {
+  margin-top: 18px;
+  text-align: center;
+  color: rgb(var(--text-soft));
+  font-size: 14px;
+}
+
+.ef-auth-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ef-auth-link {
+  color: rgb(var(--primary-2));
+  font-weight: 800;
+}
+
+.ef-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgb(var(--text-soft));
+  font-size: 14px;
+}
+
+/* ---------- UTIL ---------- */
+
+.ef-spacer-8 {
+  height: 8px;
+}
+.ef-spacer-12 {
+  height: 12px;
+}
+.ef-spacer-16 {
+  height: 16px;
+}
+.ef-spacer-20 {
+  height: 20px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 1080px) {
+  .ef-auth-shell,
+  .ef-grid-2,
+  .ef-grid-2-equal {
+    grid-template-columns: 1fr;
+  }
+
+  .ef-auth-left {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .ef-page-inner {
+    padding: 12px;
+  }
+
+  .ef-topnav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ef-brand {
+    justify-content: flex-start;
+  }
+
+  .ef-nav-links {
+    justify-content: flex-start;
+  }
+
+  .ef-page-title {
+    font-size: 30px;
+  }
+
+  .ef-auth-page {
+    padding: 14px;
+  }
+
+  .ef-auth-left,
+  .ef-auth-card {
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .ef-auth-brand-text h1 {
+    font-size: 32px;
+  }
+
+  .ef-auth-hero-title {
+    font-size: 34px;
+  }
+
+  .ef-input-row,
+  .ef-grid-3,
+  .ef-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
