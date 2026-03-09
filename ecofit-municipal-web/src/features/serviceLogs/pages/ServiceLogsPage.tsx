@@ -132,8 +132,34 @@ export default function ServiceLogsPage() {
                       <td>{wardLabel}</td>
                       <td>{row?.serviceType ?? "-"}</td>
                       <td>{row?.shift ?? "-"}</td>
-                      <td>{row?.outcome ?? "-"}</td>
-                      <td>{row?.volumeLevel ?? "-"}</td>
+                      <td>
+                        <span
+                          className={
+                            "ef-badge " +
+                            (row?.outcome === "Completed"
+                              ? "ef-badge-success"
+                              : row?.outcome === "Partial"
+                                ? "ef-badge-warning"
+                                : "ef-badge-danger")
+                          }
+                        >
+                          {row?.outcome ?? "-"}
+                        </span>
+                      </td>
+                     <td>
+                        <span
+                          className={
+                            "ef-badge " +
+                            (row?.volumeLevel === "Low"
+                              ? "ef-badge-low"
+                              : row?.volumeLevel === "Medium"
+                                ? "ef-badge-medium"
+                                : "ef-badge-high")
+                          }
+                        >
+                          {row?.volumeLevel ?? "-"}
+                        </span>
+                      </td>
                       <td>{formatDate(row?.startTime)}</td>
                       <td>{formatDate(row?.endTime)}</td>
                       <td className="text-right">

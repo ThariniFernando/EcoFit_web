@@ -80,6 +80,9 @@ img {
 .ef-page {
   min-height: 100vh;
   background: rgb(var(--bg));
+  padding: 24px;
+  max-width: var(--page-max);
+  margin: 0 auto;
 }
 
 .ef-page-inner {
@@ -215,6 +218,7 @@ img {
   border: 1px solid rgb(var(--border));
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
+  padding: 18px;
 }
 
 .ef-card-soft {
@@ -267,11 +271,12 @@ img {
 }
 
 .ef-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: rgb(var(--text-soft));
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  margin-bottom: 4px;
 }
 
 .ef-input,
@@ -281,8 +286,9 @@ img {
   border: 1px solid rgb(var(--border));
   background: rgb(var(--surface));
   color: rgb(var(--text));
-  border-radius: 14px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 14px;
   outline: none;
   transition: 0.2s ease;
 }
@@ -324,6 +330,24 @@ img {
   font-size: 18px;
 }
 
+.ef-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ef-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.ef-form-section {
+  background: rgb(var(--surface-soft));
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
 /* ---------- BUTTONS ---------- */
 
 .ef-btn {
@@ -349,9 +373,18 @@ img {
   transform: none;
 }
 
+.ef-btn-primary {
+  background: rgb(var(--primary));
+  color: white;
+}
+
+.ef-btn-primary:hover {
+  background: rgb(var(--primary-2));
+}
+
 .ef-btn-secondary {
   border: 1px solid rgb(var(--border));
-  background: rgb(var(--surface));
+  background: rgb(var(--surface-soft));
   color: rgb(var(--text));
   border-radius: 14px;
   padding: 14px 18px;
@@ -372,6 +405,335 @@ img {
   font-weight: 700;
   cursor: pointer;
   padding: 0;
+}
+
+.ef-btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+  /* height: 28px; */
+}
+
+.ef-btn {
+  border-radius: 6px;
+}
+
+.ef-actions-cell {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ef-btn-danger {
+  background: rgb(var(--danger));
+  color: white;
+}
+
+.ef-btn-form {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+/* ---------- BADGES ---------- */
+
+.ef-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Outcome badges */
+
+.ef-badge-success {
+  background: rgba(76, 175, 80, 0.15);
+  color: rgb(var(--success));
+}
+
+.ef-badge-warning {
+  background: rgba(255, 152, 0, 0.15);
+  color: rgb(var(--warning));
+}
+
+.ef-badge-danger {
+  background: rgba(217, 4, 41, 0.12);
+  color: rgb(var(--danger));
+}
+
+/* Volume badges */
+
+.ef-badge-low {
+  background: rgba(116, 198, 157, 0.18);
+  color: rgb(var(--secondary));
+}
+
+.ef-badge-medium {
+  background: rgba(255, 152, 0, 0.15);
+  color: rgb(var(--warning));
+}
+
+.ef-badge-high {
+  background: rgba(217, 4, 41, 0.12);
+  color: rgb(var(--danger));
+}
+
+/* COMPLAINT STATUS BADGES */
+
+.ef-badge-new {
+  background: rgba(255, 152, 0, 0.15);
+  color: rgb(var(--warning));
+}
+
+.ef-badge-in_progress {
+  background: rgba(64,145,108,0.15);
+  color: rgb(var(--secondary));
+}
+
+.ef-badge-resolved {
+  background: rgba(76,175,80,0.15);
+  color: rgb(var(--success));
+}
+
+.ef-badge-rejected {
+  background: rgba(217,4,41,0.12);
+  color: rgb(var(--danger));
+}
+
+.ef-status-select {
+  padding: 4px 8px;
+  height: 28px;
+  font-size: 12px;
+  min-width: 120px;
+}
+
+/* ---------- MODAL FORM SIZE ---------- */
+
+.ef-modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.ef-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ef-modal-body::-webkit-scrollbar-thumb {
+  background: rgb(var(--border));
+  border-radius: 10px;
+}
+
+/* ---------- Table ---------- */
+.ef-table-wrap {
+  overflow-x: auto;
+  margin-top: 18px;
+}
+
+.ef-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto; 
+  font-size: 14px;
+}
+
+.ef-table thead {
+  background: rgb(var(--surface-soft));
+}
+
+.ef-table thead th {
+  text-align: left;
+  padding: 14px 18px;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+  color: rgb(var(--text));
+}
+
+.ef-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgb(var(--border));
+  white-space: nowrap;
+  background: rgb(var(--bg-soft));
+}
+
+.ef-table tbody tr:hover {
+  background: rgb(var(--surface-soft));
+}
+
+.ef-table th:nth-child(1),
+.ef-table td:nth-child(1) {
+  min-width: 120px;
+}
+
+.ef-table th:nth-child(2),
+.ef-table td:nth-child(2) {
+  min-width: 140px;
+}
+
+.ef-table th:nth-child(3),
+.ef-table td:nth-child(3) {
+  min-width: 120px;
+}
+
+.ef-table th:nth-child(4),
+.ef-table td:nth-child(4) {
+  min-width: 120px;
+}
+
+.ef-table th:nth-child(5),
+.ef-table td:nth-child(5) {
+  min-width: 130px;
+}
+
+.ef-table th:nth-child(6),
+.ef-table td:nth-child(6) {
+  min-width: 110px;
+}
+
+.ef-table th:nth-child(7),
+.ef-table td:nth-child(7),
+.ef-table th:nth-child(8),
+.ef-table td:nth-child(8) {
+  min-width: 180px;
+}
+
+.ef-table th:nth-child(9),
+.ef-table td:nth-child(9) {
+  min-width: 120px;
+}
+
+.ef-table td:nth-child(6) {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ef-table td:nth-child(7) {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* STATUS TABS */
+
+.ef-segment-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ef-segment-group .ef-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 999px;
+}
+
+/* CONTROL FILTER GRID */
+
+.ef-toolbar-grid {
+  display: grid;
+  grid-template-columns: 160px 160px 1fr;
+  gap: 16px;
+  align-items: end;
+  /* margin-top: 10px; */
+  margin: 16px 0;
+}
+
+.ef-field-wide {
+  grid-column: span 1;
+}
+
+.ef-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ef-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 10px 0 16px;
+}
+
+.ef-stat-card {
+  background: rgb(var(--surface-soft));
+  border: 1px solid rgb(var(--border));
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.ef-stat-title {
+  font-size: 12px;
+  color: rgb(var(--text-soft));
+  font-weight: 700;
+}
+
+.ef-stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.ef-toolbar-actions .ef-input {
+  max-width: 280px;
+}
+
+.ef-toolbar-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: rgb(var(--text-soft));
+}
+
+.ef-content-stack > * {
+  margin-bottom: 18px;
+}
+
+/* ---------- Toolbar ---------- */
+
+.ef-toolbar button {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.ef-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ef-toolbar-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.ef-toolbar select.ef-input {
+  padding: 4px 10px;
+  height: 30px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+
+.ef-input {
+  border: 1px solid rgb(var(--border));
+  background: rgb(var(--surface));
+  color: rgb(var(--text));
+}
+
+.ef-toolbar .ef-btn {
+  padding: 5px 12px;
+  font-size: 13px;
+  height: 30px;
 }
 
 /* ---------- STATUS / ALERT ---------- */

@@ -327,13 +327,20 @@ export default function ActionPlanPage() {
           <button
             onClick={() => nav("/risk-map")}
             style={{
-              padding: "8px 12px",
-              borderRadius: 10,
-              border: "1px solid #ccc",
-              background: "white",
+              padding: "10px 16px",
+              borderRadius: 12,
+              border: "none",
+              background: "rgb(45 106 79)",
+              color: "white",
+              fontWeight: 700,
               cursor: "pointer",
-              fontWeight: 600,
+              height: 40,
+              boxShadow: "0 2px 6px rgba(0,0,0,.15)",
+              alignSelf: "flex-start",
+              transition: "all 0.2s ease",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
           >
             ← Back to Risk Map
           </button>
@@ -351,10 +358,6 @@ export default function ActionPlanPage() {
               style={{ width: 90, padding: "6px 8px", borderRadius: 10, border: "1px solid #ccc" }}
             />
           </div>
-
-          
-
-          
 
           <button
             onClick={buildPlan}
@@ -398,7 +401,7 @@ export default function ActionPlanPage() {
         <div style={{ borderRadius: 14, border: "1px solid #e6e6e6", padding: 12, height: 620, overflow: "auto" }}>
           <div style={{ fontSize: 16, fontWeight: 900 }}>Plan Summary</div>
 
-          <div style={{ marginTop: 8, fontSize: 13, color: "#444", lineHeight: 1.6 }}>
+          {/* <div style={{ marginTop: 8, fontSize: 13, color: "#444", lineHeight: 1.6 }}>
             <div>
               <b>Strategy:</b> {plan?.strategy || "—"}
             </div>
@@ -419,6 +422,45 @@ export default function ActionPlanPage() {
             </div>
             <div>
               <b>Depot:</b> {depot.name} ({depot.lat.toFixed(4)}, {depot.lng.toFixed(4)})
+            </div>
+          </div> */}
+
+          <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 13 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Strategy</span>
+              <b>{plan?.strategy || "—"}</b>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Total stops</span>
+              <b>{plan?.totalStops ?? items.length}</b>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Recommended crews</span>
+              <b>{plan?.recommendedCrewCount ?? crewCount}</b>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Trucks per crew</span>
+              <b>{plan?.recommendedTrucksPerCrew ?? trucksPerCrew}</b>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Workers per crew</span>
+              <b>{plan?.recommendedWorkersPerCrew ?? workersPerCrew}</b>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Total demand score</span>
+              <b>{totalDemand.toFixed(3)}</b>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "#666" }}>Depot</span>
+              <b>
+                {depot.name} ({depot.lat.toFixed(4)}, {depot.lng.toFixed(4)})
+              </b>
             </div>
           </div>
 
@@ -473,7 +515,7 @@ export default function ActionPlanPage() {
               </div>
             </div>
           ) : null}
-
+          {/* 
           <div style={{ marginTop: 14, borderTop: "1px solid #eee", paddingTop: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 900 }}>Route Plan Settings</div>
             <div style={{ marginTop: 8, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
@@ -510,6 +552,81 @@ export default function ActionPlanPage() {
             <div style={{ marginTop: 6, fontSize: 12, color: "#666" }}>
               Schedule = OSRM travel time per leg + service time per stop. Route order now considers priority boosts and operational demand.
             </div>
+          </div> */}
+
+          <div style={{ marginTop: 18, borderTop: "1px solid #eee", paddingTop: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 10 }}>
+              Route Plan Settings
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 12,
+                alignItems: "center",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+                  Start Time
+                </div>
+
+                <div style={{ display: "flex", gap: 6 }}>
+                  <input
+                    value={startHour}
+                    type="number"
+                    min={0}
+                    max={23}
+                    onChange={(e) => setStartHour(Number(e.target.value))}
+                    style={{
+                      width: 70,
+                      padding: "6px 8px",
+                      borderRadius: 10,
+                      border: "1px solid #ccc",
+                    }}
+                  />
+
+                  <input
+                    value={startMinute}
+                    type="number"
+                    min={0}
+                    max={59}
+                    onChange={(e) => setStartMinute(Number(e.target.value))}
+                    style={{
+                      width: 70,
+                      padding: "6px 8px",
+                      borderRadius: 10,
+                      border: "1px solid #ccc",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+                  Service Minutes per Stop
+                </div>
+
+                <input
+                  value={serviceMinutesPerStop}
+                  type="number"
+                  min={1}
+                  max={120}
+                  onChange={(e) => setServiceMinutesPerStop(Number(e.target.value))}
+                  style={{
+                    width: 100,
+                    padding: "6px 8px",
+                    borderRadius: 10,
+                    border: "1px solid #ccc",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 10, fontSize: 12, color: "#777" }}>
+              Schedule = OSRM travel time per leg + service time per stop.
+            </div>
           </div>
 
           <div style={{ marginTop: 14, borderTop: "1px solid #eee", paddingTop: 12 }}>
@@ -518,19 +635,19 @@ export default function ActionPlanPage() {
             </div>
 
             <div style={{ marginTop: 10, overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, background: "white" }}>
                 <thead>
-                  <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                    <th style={{ padding: "8px 6px" }}>Stop</th>
-                    <th style={{ padding: "8px 6px" }}>ETA</th>
-                    <th style={{ padding: "8px 6px" }}>Leg (km)</th>
-                    <th style={{ padding: "8px 6px" }}>Leg (min)</th>
-                    <th style={{ padding: "8px 6px" }}>Ward</th>
-                    <th style={{ padding: "8px 6px" }}>Risk</th>
-                    <th style={{ padding: "8px 6px" }}>Score</th>
-                    <th style={{ padding: "8px 6px" }}>Priority</th>
-                    <th style={{ padding: "8px 6px" }}>Reason</th>
-                    <th style={{ padding: "8px 6px" }}>Mode</th>
+                  <tr style={{ textAlign: "left", borderBottom: "2px solid #eee", background: "#fafafa" }}>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Stop</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>ETA</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Leg (km)</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Leg (min)</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Ward</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Risk</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Score</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Priority</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Reason</th>
+                    <th style={{ padding: "10px 8px", fontWeight: 700 }}>Mode</th>
                   </tr>
                 </thead>
                 <tbody>

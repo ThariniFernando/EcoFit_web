@@ -232,10 +232,10 @@ export default function ComplaintsPage() {
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="category / description / complaint id..."
               />
-              <button className="ef-btn ef-btn-primary" onClick={onApply}>
+              <button className="ef-btn ef-btn-primary ef-btn-sm" onClick={onApply}>
                 Apply
               </button>
-              <button className="ef-btn ef-btn-secondary" onClick={onRefresh}>
+              <button className="ef-btn ef-btn-secondary ef-btn-sm" onClick={onRefresh}>
                 Refresh
               </button>
             </div>
@@ -294,10 +294,14 @@ export default function ComplaintsPage() {
                     <td>{typeof c.severity === "number" ? c.severity : "-"}</td>
                     <td>{c.description || "-"}</td>
                     <td>{locationLabel(c)}</td>
-                    <td>{c.status}</td>
+                    <td>
+                      <span className={`ef-badge ef-badge-${c.status.toLowerCase()}`}>
+                        {c.status}
+                      </span>
+                    </td>
                     <td className="text-right">
                       <div className="ef-actions-cell">
-                        {STATUSES.filter((s) => s !== c.status).map((s) => (
+                        {/* {STATUSES.filter((s) => s !== c.status).map((s) => (
                           <button
                             key={s}
                             className="ef-btn ef-btn-sm ef-btn-secondary"
@@ -305,7 +309,18 @@ export default function ComplaintsPage() {
                           >
                             Mark {s}
                           </button>
-                        ))}
+                        ))} */}
+                        <select
+                          className="ef-input ef-status-select"
+                          value={c.status}
+                          onChange={(e) => onUpdateStatus(c.id, e.target.value as ComplaintStatus)}
+                        >
+                          {STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </td>
                   </tr>
@@ -322,14 +337,14 @@ export default function ComplaintsPage() {
 
           <div className="ef-toolbar-actions">
             <button
-              className="ef-btn ef-btn-secondary"
+              className="ef-btn ef-btn-secondary ef-btn-sm"
               disabled={!canPrev}
               onClick={() => setSkip((s) => Math.max(0, s - limit))}
             >
               Prev
             </button>
             <button
-              className="ef-btn ef-btn-secondary"
+              className="ef-btn ef-btn-secondary ef-btn-sm"
               disabled={!canNext}
               onClick={() => setSkip((s) => s + limit)}
             >

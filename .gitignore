@@ -2,6 +2,9 @@
 ecofit-municipal-api/.venv/
 .venv/
 venv/
+ecofit-municipal-api/.ecovenv/
+.ecovenv/
+ecovenv/
 __pycache__/
 *.pyc
 .env

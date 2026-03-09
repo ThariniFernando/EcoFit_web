@@ -29,6 +29,16 @@ const RISK_ORDER: Record<RiskClass, number> = {
   EMERGENCY: 3,
 };
 
+const filterBtn = {
+  padding: "6px 12px",
+  borderRadius: 20,
+  border: "1px solid #ddd",
+  background: "#fff",
+  cursor: "pointer",
+  fontSize: 13,
+  fontWeight: 600,
+};
+
 function colorForRisk(r: RiskClass): string {
   switch (r) {
     case "LOW":
@@ -205,11 +215,13 @@ export default function RiskMapPage() {
     });
   };
 
+  const buttonHover = { background: "#f0f0f0", transform: "translateY(-1px)" };
+
   return (
     <div style={{ padding: 16 }}>
       <QuickNav />
 
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
         <div>
           <h2 style={{ margin: 0 }}>Ward Risk Map</h2>
           <div style={{ opacity: 0.8, marginTop: 6 }}>
@@ -223,14 +235,20 @@ export default function RiskMapPage() {
         <button
           onClick={goActionPlan}
           style={{
-            padding: "10px 14px",
-            borderRadius: 10,
-            border: "1px solid #ccc",
-            background: "white",
+            padding: "10px 16px",
+            borderRadius: 12,
+            border: "none",
+            background: "rgb(45 106 79)",
+            color: "white",
+            fontWeight: 700,
             cursor: "pointer",
-            height: 42,
+            height: 40,
+            boxShadow: "0 2px 6px rgba(0,0,0,.15)",
             alignSelf: "flex-start",
+            transition: "all 0.2s ease",
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+          onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
         >
           Generate Action Plan →
         </button>
@@ -238,6 +256,9 @@ export default function RiskMapPage() {
 
       <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
         <button
+          style={filterBtn}
+          onMouseEnter={(e) => Object.assign(e.currentTarget.style, buttonHover)}
+          onMouseLeave={(e) => Object.assign(e.currentTarget.style, filterBtn)}
           onClick={() =>
             setRiskEnabled({
               LOW: true,
@@ -250,6 +271,9 @@ export default function RiskMapPage() {
           Show All
         </button>
         <button
+          style={filterBtn}
+          onMouseEnter={(e) => Object.assign(e.currentTarget.style, buttonHover)}
+          onMouseLeave={(e) => Object.assign(e.currentTarget.style, filterBtn)}
           onClick={() =>
             setRiskEnabled({
               LOW: false,
@@ -262,6 +286,9 @@ export default function RiskMapPage() {
           High+
         </button>
         <button
+          style={filterBtn}
+          onMouseEnter={(e) => Object.assign(e.currentTarget.style, buttonHover)}
+          onMouseLeave={(e) => Object.assign(e.currentTarget.style, filterBtn)}
           onClick={() =>
             setRiskEnabled({
               LOW: false,
@@ -274,7 +301,7 @@ export default function RiskMapPage() {
           Emergency
         </button>
 
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
           <input
             type="checkbox"
             checked={riskEnabled.LOW}
@@ -282,7 +309,19 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, LOW: e.target.checked }))
             }
           />
-          <span style={{ color: colorForRisk("LOW"), fontWeight: 700 }}>LOW</span>
+          {/* <span style={{ color: colorForRisk("LOW"), fontWeight: 700 }}>LOW</span> */}
+          <span
+            style={{
+              background: colorForRisk("LOW"),
+              color: "white",
+              padding: "3px 8px",
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
+            LOW
+          </span>
         </label>
 
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -293,7 +332,19 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, MEDIUM: e.target.checked }))
             }
           />
-          <span style={{ color: colorForRisk("MEDIUM"), fontWeight: 700 }}>
+          {/* <span style={{ color: colorForRisk("MEDIUM"), fontWeight: 700 }}>
+            MEDIUM
+          </span> */}
+          <span
+            style={{
+              background: colorForRisk("MEDIUM"),
+              color: "white",
+              padding: "3px 8px",
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
             MEDIUM
           </span>
         </label>
@@ -306,7 +357,19 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, HIGH: e.target.checked }))
             }
           />
-          <span style={{ color: colorForRisk("HIGH"), fontWeight: 700 }}>HIGH</span>
+          {/* <span style={{ color: colorForRisk("HIGH"), fontWeight: 700 }}>HIGH</span> */}
+          <span
+            style={{
+              background: colorForRisk("HIGH"),
+              color: "white",
+              padding: "3px 8px",
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
+            HIGH
+          </span>
         </label>
 
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -317,7 +380,19 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, EMERGENCY: e.target.checked }))
             }
           />
-          <span style={{ color: colorForRisk("EMERGENCY"), fontWeight: 700 }}>
+          {/* <span style={{ color: colorForRisk("EMERGENCY"), fontWeight: 700 }}>
+            EMERGENCY
+          </span> */}
+          <span
+            style={{
+              background: colorForRisk("EMERGENCY"),
+              color: "white",
+              padding: "3px 8px",
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
             EMERGENCY
           </span>
         </label>
@@ -327,10 +402,12 @@ export default function RiskMapPage() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search ward name or ID..."
           style={{
-            padding: "8px 10px",
-            borderRadius: 10,
-            border: "1px solid #ccc",
+            padding: "8px 12px",
+            borderRadius: 20,
+            border: "1px solid #ddd",
             minWidth: 260,
+            outline: "none",
+            boxShadow: "0 1px 4px rgba(0,0,0,.06)"
           }}
         />
 
@@ -366,6 +443,7 @@ export default function RiskMapPage() {
             border: "1px solid #e5e5e5",
             borderRadius: 12,
             overflow: "hidden",
+            boxShadow: "0 4px 12px rgba(0,0,0,.05)"
           }}
         >
           <MapContainer
@@ -433,18 +511,20 @@ export default function RiskMapPage() {
             overflow: "auto",
           }}
         >
-          <h3 style={{ marginTop: 0 }}>Queue (priority list)</h3>
+          {/* <h3 style={{ marginTop: 0 }}>Queue (priority list)</h3> */}
+          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 10 }}>Priority Queue</div>
 
           <div
             style={{
               border: "1px solid #eee",
               borderRadius: 12,
-              padding: 10,
-              marginBottom: 10,
-              background: "#fff",
+              padding: 12,
+              marginBottom: 12,
+              cursor: "pointer",
+              background: "#f9fbff",
             }}
           >
-            
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>Weather</div>
             {weather ? (
               <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.5 }}>
                 <div>
@@ -482,11 +562,13 @@ export default function RiskMapPage() {
                 }
               }}
               style={{
-                border: "1px solid #eee",
+                border: "2px solid #eee",
                 borderRadius: 12,
                 padding: 10,
                 marginBottom: 8,
                 cursor: "pointer",
+                background: "#fff",
+                transition: "all 0.2s ease",
               }}
             >
               <div style={{ fontWeight: 700 }}>{w.wardName || w.wardId}</div>
