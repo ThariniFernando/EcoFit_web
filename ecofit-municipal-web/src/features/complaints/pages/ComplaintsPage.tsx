@@ -32,9 +32,11 @@ function formatDate(s?: string | null) {
 }
 
 function wardLabel(c: Complaint) {
-  const w = c.ward;
-  if (!w) return "-";
-  return w.wardName || w.wardId || "-";
+  if (c.ward?.wardName) return c.ward.wardName;
+  if (c.ward?.wardId) return c.ward.wardId;
+  if (c.wardName) return c.wardName;
+  if (c.wardId) return c.wardId;
+  return "-";
 }
 
 function locationLabel(c: Complaint) {
@@ -93,12 +95,12 @@ export default function ComplaintsPage() {
     setError("");
 
     try {
-      const w = await getWards();
+      const [w, res] = await Promise.all([getWards(), listComplaints(params)]);
       setWards(w);
+      setItems(Array.isArray(res.items) ? res.items : []);
+      setTotal(typeof res.total === "number" ? res.total : 0);
 
-      const res = await listComplaints(params);
-      setItems(res.items);
-      setTotal(res.total);
+      console.log("Complaints loaded:", res.items);
     } catch (e: any) {
       setError(e?.message || "Failed to load complaints");
     } finally {
@@ -250,14 +252,22 @@ export default function ComplaintsPage() {
 
         <div className="ef-toolbar-meta">
           <div>
-            {loading
-              ? "Loading complaints..."
-              : `Showing ${items.length} of ${total} complaints`}
+            {loading ? "Loading complaints..." : `Showing ${items.length} of ${total} complaints`}
           </div>
           <div>
             Window: <b>{hours}h</b>
-            {status ? <> | Status: <b>{status}</b></> : null}
-            {wardId ? <> | Ward: <b>{wardId}</b></> : null}
+            {status ? (
+              <>
+                {" "}
+                | Status: <b>{status}</b>
+              </>
+            ) : null}
+            {wardId ? (
+              <>
+                {" "}
+                | Ward: <b>{wardId}</b>
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -295,21 +305,12 @@ export default function ComplaintsPage() {
                     <td>{c.description || "-"}</td>
                     <td>{locationLabel(c)}</td>
                     <td>
-                      <span className={`ef-badge ef-badge-${c.status.toLowerCase()}`}>
+                      <span className={`ef-badge ef-badge-${String(c.status).toLowerCase()}`}>
                         {c.status}
                       </span>
                     </td>
                     <td className="text-right">
                       <div className="ef-actions-cell">
-                        {/* {STATUSES.filter((s) => s !== c.status).map((s) => (
-                          <button
-                            key={s}
-                            className="ef-btn ef-btn-sm ef-btn-secondary"
-                            onClick={() => onUpdateStatus(c.id, s)}
-                          >
-                            Mark {s}
-                          </button>
-                        ))} */}
                         <select
                           className="ef-input ef-status-select"
                           value={c.status}

@@ -2,10 +2,10 @@
 import os
 import traceback
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException
 from dotenv import load_dotenv
+from fastapi import APIRouter, HTTPException
 
 from database import database
 from ml.inference import LSTMInference
@@ -20,6 +20,20 @@ WARDS_MASTER_COL = os.getenv("WARDS_MASTER_COL", "wards_master")
 
 def norm_ward_id(x) -> str:
     return str(x or "").strip().upper()
+
+
+def safe_float(value, default=None):
+    try:
+        if value is None:
+            return default
+        v = float(value)
+        if v != v:  # nan
+            return default
+        if v == float("inf") or v == float("-inf"):
+            return default
+        return v
+    except Exception:
+        return default
 
 
 @router.get("/health")
@@ -57,10 +71,13 @@ async def run_predict_and_store() -> Dict[str, Any]:
     ):
         wid = norm_ward_id(w.get("wardId"))
         center = w.get("center") or {}
+        if not isinstance(center, dict):
+            center = {}
+
         ward_map[wid] = {
             "wardName": w.get("wardName"),
-            "lat": center.get("lat"),
-            "lng": center.get("lng"),
+            "lat": safe_float(center.get("lat"), None),
+            "lng": safe_float(center.get("lng"), None),
             "active": w.get("active", True),
         }
 
@@ -71,11 +88,19 @@ async def run_predict_and_store() -> Dict[str, Any]:
         wid = norm_ward_id(p.get("wardId"))
         meta = ward_map.get(wid, {})
 
-        lat = meta.get("lat")
-        lng = meta.get("lng")
+        lat = safe_float(meta.get("lat"), None)
+        lng = safe_float(meta.get("lng"), None)
 
-        if not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
+        if lat is None or lng is None:
             missing_geo += 1
+
+        probs = p.get("probabilities", [])
+        if isinstance(probs, list):
+            clean_probs = [safe_float(x, 0.0) for x in probs]
+        else:
+            clean_probs = []
+
+        risk_score = safe_float(p.get("riskScore", 0.0), 0.0)
 
         docs.append(
             {
@@ -85,8 +110,8 @@ async def run_predict_and_store() -> Dict[str, Any]:
                 "lng": lng,
                 "tsPrediction": ts_pred_dt,
                 "riskClass": p.get("riskClass"),
-                "riskScore": float(p.get("riskScore", 0.0)),
-                "probabilities": p.get("probabilities", []),
+                "riskScore": risk_score,
+                "probabilities": clean_probs,
             }
         )
 
@@ -95,7 +120,7 @@ async def run_predict_and_store() -> Dict[str, Any]:
     if docs:
         await database[PREDICTIONS_COL].insert_many(docs)
 
-        response_items = []
+    response_items = []
     for d in docs:
         response_items.append(
             {
