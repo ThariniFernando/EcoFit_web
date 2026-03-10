@@ -10,6 +10,7 @@ import ServiceLogsPage from "../features/serviceLogs/pages/ServiceLogsPage";
 import ComplaintsPage from "../features/complaints/pages/ComplaintsPage";
 import WardHourlyFeaturesPage from "../features/wardHourlyFeatures/pages/WardHourlyFeaturesPage";
 import WeatherPage from "../features/weather/pages/WeatherPage";
+import KnowledgeBasePage from "../features/knowledgeBase/KnowledgeBasePage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/sign-in" replace /> },
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: "complaints", element: <ComplaintsPage /> },
       { path: "ward-hourly-features", element: <WardHourlyFeaturesPage /> },
       { path: "weather-hourly", element: <WeatherPage /> },
+      { path: "knowledge-base", element: <KnowledgeBasePage /> },
     ],
   },
 

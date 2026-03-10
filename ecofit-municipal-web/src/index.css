@@ -976,6 +976,162 @@ img {
   height: 20px;
 }
 
+/* ---------- Knowledge base ---------- */
+.kb-page {
+  padding: 30px 40px;
+  max-width: 1500px;
+  margin: auto;
+}
+
+.kb-title {
+  margin-bottom: 20px;
+  color: rgb(27 67 50);
+}
+
+/* SEARCH */
+
+.kb-search {
+  width: 320px;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid rgb(224 234 229);
+  /* margin-bottom: 18px; */
+  outline: none;
+}
+
+.kb-search:focus {
+  border-color: rgb(45 106 79);
+}
+
+/* Upload Card */
+
+.kb-upload-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgb(224 234 229);
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 880px;
+  flex-wrap: wrap;
+}
+
+.kb-upload-btn {
+  background: rgb(45 106 79);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.kb-upload-btn:hover {
+  background: rgb(36 85 64);
+  transform: translateY(-1px);
+}
+
+.kb-upload-label {
+  display: inline-block;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kb-upload-label input {
+  display: block;
+  margin-top: 8px;
+}
+
+/* Table Card */
+
+.kb-table-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid rgb(224 234 229);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Table */
+
+.kb-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.kb-table thead {
+  background: rgb(241 248 233);
+}
+
+.kb-table th {
+  text-align: left;
+  padding: 12px;
+  font-weight: 700;
+}
+
+.kb-table td {
+  padding: 12px;
+  border-top: 1px solid rgb(224 234 229);
+}
+
+/* Hover row */
+
+.kb-table tbody tr:hover {
+  background: rgb(248 252 250);
+}
+
+/* ID style */
+
+.kb-id {
+  font-family: monospace;
+  font-size: 13px;
+  color: rgb(82 121 111);
+  padding: 3px 8px;
+  border-radius: 6px;
+  max-width: 200px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* white-space: nowrap; */
+}
+
+/* Delete button */
+
+.kb-delete-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgb(217 4 41);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kb-delete-btn:hover {
+  background: rgb(180 0 30);
+  transform: translateY(-1px);
+}
+
+/* Status text */
+
+.kb-status {
+  margin-top: 10px;
+  color: rgb(82 121 111);
+}
+
+/* Empty row */
+
+.kb-empty {
+  text-align: center;
+  padding: 20px;
+  color: rgb(102 102 102);
+}
+
 /* ---------- RESPONSIVE ---------- */
 
 @media (max-width: 1080px) {

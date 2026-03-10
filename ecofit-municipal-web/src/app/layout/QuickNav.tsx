@@ -5,6 +5,7 @@ const links = [
   { to: "/action-plan", label: "Action Plan" },
   { to: "/service-logs", label: "Service Logs" },
   { to: "/complaints", label: "Complaints" },
+  { to: "/knowledge-base", label: "Knowledge Base" },
 ];
 
 export default function QuickNav() {
