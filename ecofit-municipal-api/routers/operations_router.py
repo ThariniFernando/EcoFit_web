@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from typing import List, Optional, Dict, Any, Tuple
-from math import radians, sin, cos, asin, sqrt, ceil
+from math import radians, sin, cos, asin, sqrt, ceil, floor
 from datetime import datetime, timedelta, timezone
 
 import requests
@@ -34,6 +34,11 @@ def haversine_m(a: Tuple[float, float], b: Tuple[float, float]) -> float:
     dlon = radians(lon2 - lon1)
     s = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     return 2 * R * asin(sqrt(s))
+
+
+def approx_travel_minutes(a: Tuple[float, float], b: Tuple[float, float]) -> float:
+    dist_m = haversine_m(a, b)
+    return max(1.0, dist_m / 366.0)  # ~22 km/h fallback
 
 
 def osrm_coords(points_latlng: List[Tuple[float, float]]) -> str:
@@ -102,15 +107,15 @@ def extract_ward_id(doc: Dict[str, Any]) -> str:
     return ""
 
 
-def parse_dt(x: Any) -> Optional[datetime]:
-    if x is None:
-        return None
-    if isinstance(x, datetime):
-        return x if x.tzinfo else x.replace(tzinfo=timezone.utc)
-    try:
-        return datetime.fromisoformat(str(x).replace("Z", "+00:00"))
-    except Exception:
-        return None
+def risk_class_weight(risk_class: str) -> float:
+    rc = str(risk_class or "").upper().strip()
+    if rc == "EMERGENCY":
+        return 3.2
+    if rc == "HIGH":
+        return 1.7
+    if rc == "MEDIUM":
+        return 0.7
+    return 0.0
 
 
 # -------------------------
@@ -144,7 +149,7 @@ class GenerateActionPlanRequest(BaseModel):
 class RouteLeg(BaseModel):
     distanceM: Optional[float] = None
     durationS: Optional[float] = None
-    mode: Optional[str] = None  # "OSRM" | "Fallback"
+    mode: Optional[str] = None
 
 
 class RouteStop(BaseModel):
@@ -185,12 +190,8 @@ class ActionPlanResponse(BaseModel):
 
 
 # -------------------------
-# Priority / clustering / ordering
+# Clustering / ordering
 # -------------------------
-def dist2(a: WardPoint, b: WardPoint) -> float:
-    return (a.lat - b.lat) ** 2 + (a.lng - b.lng) ** 2
-
-
 def cluster_points(points: List[WardPoint], k: int) -> List[List[WardPoint]]:
     k = max(1, min(k, len(points)))
 
@@ -215,6 +216,50 @@ def cluster_points(points: List[WardPoint], k: int) -> List[List[WardPoint]]:
         return clusters
 
 
+def merge_tiny_clusters(
+    clusters: List[List[WardPoint]],
+    min_cluster_size: int = 3,
+) -> List[List[WardPoint]]:
+    """
+    Merge clusters that are too small into the nearest larger cluster.
+    Prevents wasteful crews with only 1–2 stops.
+    """
+    if len(clusters) <= 1:
+        return clusters
+
+    large = [c[:] for c in clusters if len(c) >= min_cluster_size]
+    tiny = [c[:] for c in clusters if len(c) < min_cluster_size]
+
+    if not tiny:
+        return clusters
+
+    if not large:
+        # if all are tiny, just return original
+        return clusters
+
+    def cluster_center(cluster: List[WardPoint]) -> Tuple[float, float]:
+        lat = sum(p.lat for p in cluster) / len(cluster)
+        lng = sum(p.lng for p in cluster) / len(cluster)
+        return lat, lng
+
+    for small in tiny:
+        s_center = cluster_center(small)
+
+        best_i = 0
+        best_dist = float("inf")
+        for i, big in enumerate(large):
+            b_center = cluster_center(big)
+            d = haversine_m(s_center, b_center)
+            if d < best_dist:
+                best_dist = d
+                best_i = i
+
+        large[best_i].extend(small)
+
+    large.sort(key=lambda c: len(c), reverse=True)
+    return large
+
+
 def order_priority_aware_nearest_neighbor(
     points: List[WardPoint],
     priority_map: Dict[str, float],
@@ -222,26 +267,47 @@ def order_priority_aware_nearest_neighbor(
     if not points:
         return []
 
-    remaining = sorted(
-        points,
-        key=lambda x: priority_map.get(x.wardId, x.riskScore),
-        reverse=True,
-    )
+    remaining = list(points)
 
-    current = remaining.pop(0)
+    current = max(
+        remaining,
+        key=lambda x: priority_map.get(x.wardId, x.riskScore),
+    )
+    remaining.remove(current)
     ordered = [current]
 
     while remaining:
         last = ordered[-1]
+        last_pos = (last.lat, last.lng)
 
-        def score(i: int) -> float:
-            p = remaining[i]
-            priority = priority_map.get(p.wardId, p.riskScore)
-            distance_penalty = dist2(last, p)
-            return priority * 10.0 - distance_penalty
+        def candidate_score(p: WardPoint) -> float:
+            priority = float(priority_map.get(p.wardId, p.riskScore))
+            travel_min = approx_travel_minutes(last_pos, (p.lat, p.lng))
+            class_bonus = risk_class_weight(p.riskClass)
 
-        best_i = max(range(len(remaining)), key=score)
-        ordered.append(remaining.pop(best_i))
+            nearby_bonus = 0.0
+            if travel_min <= 3:
+                nearby_bonus = 1.8
+            elif travel_min <= 6:
+                nearby_bonus = 1.0
+            elif travel_min <= 10:
+                nearby_bonus = 0.35
+
+            emergency_far_penalty = 0.0
+            if str(p.riskClass).upper() == "EMERGENCY" and travel_min > 18:
+                emergency_far_penalty = 0.8
+
+            return (
+                priority * 1.9
+                + class_bonus
+                + nearby_bonus
+                - (travel_min * 0.22)
+                - emergency_far_penalty
+            )
+
+        best = max(remaining, key=candidate_score)
+        remaining.remove(best)
+        ordered.append(best)
 
     return ordered
 
@@ -311,22 +377,27 @@ async def get_recent_operational_signals(
     return signals
 
 
-def make_priority_score(base_risk: float, s: Dict[str, float]) -> Tuple[float, str]:
+def make_priority_score(item: WardPoint, s: Dict[str, float]) -> Tuple[float, str]:
     missed = s.get("missedCount", 0.0)
     high_missed = s.get("highMissedCount", 0.0)
     complaints = s.get("complaintsCount", 0.0)
     unresolved = s.get("unresolvedComplaints", 0.0)
 
+    class_boost = risk_class_weight(item.riskClass)
+
     boost = (
-        missed * 0.08
-        + high_missed * 0.12
-        + complaints * 0.03
-        + unresolved * 0.04
+        class_boost
+        + missed * 0.35
+        + high_missed * 0.80
+        + complaints * 0.12
+        + unresolved * 0.22
     )
 
-    priority = base_risk + boost
+    priority = float(item.riskScore) + boost
 
     reasons = []
+    if class_boost > 0:
+        reasons.append(f"class:{item.riskClass}")
     if missed > 0:
         reasons.append(f"missed:{int(missed)}")
     if high_missed > 0:
@@ -347,23 +418,54 @@ def recommend_resources(
     req_trucks: int,
     req_workers: int,
 ) -> Tuple[int, int, int]:
+    """
+    Practical rule:
+    - keep crews useful
+    - aim around 5–8 stops per crew
+    - avoid too many crews with only 1–2 wards
+    """
     total_priority = sum(priority_map.get(x.wardId, x.riskScore) for x in items)
     total_high_missed = sum(signals_map.get(x.wardId, {}).get("highMissedCount", 0.0) for x in items)
     total_missed = sum(signals_map.get(x.wardId, {}).get("missedCount", 0.0) for x in items)
+    total_unresolved = sum(signals_map.get(x.wardId, {}).get("unresolvedComplaints", 0.0) for x in items)
+    total_complaints = sum(signals_map.get(x.wardId, {}).get("complaintsCount", 0.0) for x in items)
+    emergency_count = sum(1 for x in items if str(x.riskClass).upper() == "EMERGENCY")
+    n = len(items)
 
-    recommended_crews = max(
-        req_crews,
-        min(10, ceil(len(items) / 8), ceil(total_priority / 6)),
-    )
+    # base practical crew estimate from stop count
+    crews_by_stop_load = ceil(n / 7)   # target about 7 stops per crew
+    max_practical_crews = max(1, floor(n / 4))  # at least ~4 stops per crew
+    min_practical_crews = max(1, ceil(n / 10))  # avoid under-allocation for large plans
+
+    demand_pressure = 0
+    if emergency_count >= 8:
+        demand_pressure += 1
+    if total_high_missed >= 6:
+        demand_pressure += 1
+    if total_unresolved >= 10:
+        demand_pressure += 1
+    if total_priority >= 120:
+        demand_pressure += 1
+
+    recommended_crews = crews_by_stop_load + demand_pressure
+
+    recommended_crews = max(recommended_crews, min_practical_crews)
+    recommended_crews = min(recommended_crews, max_practical_crews)
+
+    # allow user minimum request but don't let it explode
+    recommended_crews = max(min(req_crews, max_practical_crews), recommended_crews)
 
     recommended_trucks = max(
         req_trucks,
-        2 if total_high_missed >= 3 or total_missed >= 5 else 1,
+        2 if emergency_count >= 3 or total_high_missed >= 3 or total_missed >= 6 else 1,
     )
 
     recommended_workers = max(
         req_workers,
-        4 if total_high_missed >= 4 else 3 if total_high_missed >= 2 else 2,
+        5 if emergency_count >= 4 or total_unresolved >= 8 else
+        4 if emergency_count >= 2 or total_high_missed >= 2 or total_complaints >= 6 else
+        3 if total_complaints >= 3 or total_missed >= 3 else
+        2,
     )
 
     return recommended_crews, recommended_trucks, recommended_workers
@@ -406,7 +508,7 @@ async def action_plan(req: GenerateActionPlanRequest):
 
     for x in items:
         priority, reason = make_priority_score(
-            base_risk=float(x.riskScore),
+            item=x,
             s=signals_map.get(x.wardId, {}),
         )
         priority_map[x.wardId] = priority
@@ -421,11 +523,13 @@ async def action_plan(req: GenerateActionPlanRequest):
         req_workers=int(req.workersPerCrew),
     )
 
-    crews = max(1, min(int(recommended_crews), 20))
+    crews = max(1, min(int(recommended_crews), len(items)))
     max_total = crews * max(1, int(req.maxStopsPerCrew))
 
     items = sorted(items, key=lambda x: priority_map.get(x.wardId, x.riskScore), reverse=True)[:max_total]
+
     clusters = cluster_points(items, crews)
+    clusters = merge_tiny_clusters(clusters, min_cluster_size=3)
 
     crew_plans: List[CrewPlan] = []
 
@@ -437,17 +541,22 @@ async def action_plan(req: GenerateActionPlanRequest):
         crew_stop_count = len(ordered)
         crew_high_missed = sum(signals_map.get(p.wardId, {}).get("highMissedCount", 0.0) for p in ordered)
         crew_missed = sum(signals_map.get(p.wardId, {}).get("missedCount", 0.0) for p in ordered)
+        crew_unresolved = sum(signals_map.get(p.wardId, {}).get("unresolvedComplaints", 0.0) for p in ordered)
+        crew_complaints = sum(signals_map.get(p.wardId, {}).get("complaintsCount", 0.0) for p in ordered)
+        crew_emergency = sum(1 for p in ordered if str(p.riskClass).upper() == "EMERGENCY")
 
         crew_trucks_allocated = max(
             1,
-            recommended_trucks,
-            2 if crew_high_missed >= 2 or crew_missed >= 4 or crew_stop_count >= 10 else 1,
+            2 if crew_emergency >= 3 or crew_high_missed >= 2 or crew_stop_count >= 12 else recommended_trucks
         )
 
         crew_workers_allocated = max(
             2,
-            recommended_workers,
-            4 if crew_demand_score >= 7 else 3 if crew_demand_score >= 4 else 2,
+            6 if crew_emergency >= 3 or crew_unresolved >= 7 else
+            5 if crew_emergency >= 2 or crew_high_missed >= 2 or crew_complaints >= 6 else
+            4 if crew_demand_score >= 16 or crew_stop_count >= 9 else
+            3 if crew_demand_score >= 8 else
+            recommended_workers
         )
 
         points_latlng: List[Tuple[float, float]] = [(depot["lat"], depot["lng"])] + [(p.lat, p.lng) for p in ordered]
@@ -517,10 +626,10 @@ async def action_plan(req: GenerateActionPlanRequest):
 
     return ActionPlanResponse(
         tsPrediction=req.tsPrediction,
-        strategy="boosted-priority + kmeans-cluster + priority-aware nearest-neighbour + OSRM legs + fallback haversine",
+        strategy="practical-priority + balanced-crews + tiny-cluster-merge + urgency/travel-balanced ordering + OSRM legs + fallback haversine",
         totalStops=total_stops,
         crews=len(crew_plans),
-        recommendedCrewCount=recommended_crews,
+        recommendedCrewCount=len(crew_plans),
         recommendedTrucksPerCrew=recommended_trucks,
         recommendedWorkersPerCrew=recommended_workers,
         crewPlans=crew_plans,

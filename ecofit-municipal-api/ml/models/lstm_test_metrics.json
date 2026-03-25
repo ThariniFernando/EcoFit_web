@@ -1,0 +1,11 @@
+{
+  "accuracy": 0.781,
+  "precision_macro": 0.78075,
+  "recall_macro": 0.747406,
+  "f1_macro": 0.759368,
+  "best_val_acc": 0.830357,
+  "num_features": 16,
+  "num_train_windows": 39984,
+  "num_val_windows": 6048,
+  "num_test_windows": 6000
+}

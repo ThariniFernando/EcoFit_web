@@ -17,11 +17,6 @@ import {
   type RiskClass,
 } from "../api/predictionsApi";
 
-import {
-  fetchCurrentWeatherColombo,
-  type CurrentWeatherResponse,
-} from "../../weather/api/weatherApi";
-
 const RISK_ORDER: Record<RiskClass, number> = {
   LOW: 0,
   MEDIUM: 1,
@@ -88,10 +83,6 @@ export default function RiskMapPage() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [items, setItems] = useState<PredictionMapItem[]>([]);
 
-  // weather
-  const [weather, setWeather] = useState<CurrentWeatherResponse | null>(null);
-  const [weatherError, setWeatherError] = useState<string | null>(null);
-
   // filters
   const [query, setQuery] = useState("");
   const [riskEnabled, setRiskEnabled] = useState<Record<RiskClass, boolean>>({
@@ -110,7 +101,7 @@ export default function RiskMapPage() {
     null
   );
 
-  // ✅ AUTO REFRESH predictions every 15s
+  // AUTO REFRESH predictions every 15s
   useEffect(() => {
     let alive = true;
 
@@ -144,31 +135,6 @@ export default function RiskMapPage() {
       clearInterval(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ✅ AUTO REFRESH weather every 10 minutes
-  useEffect(() => {
-    let alive = true;
-
-    const loadWeather = async () => {
-      try {
-        setWeatherError(null);
-        const w = await fetchCurrentWeatherColombo();
-        if (!alive) return;
-        setWeather(w);
-      } catch (e: any) {
-        if (!alive) return;
-        setWeatherError(e?.message || "Failed to load weather");
-      }
-    };
-
-    loadWeather();
-    const t = setInterval(loadWeather, 10 * 60 * 1000);
-
-    return () => {
-      alive = false;
-      clearInterval(t);
-    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -309,7 +275,6 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, LOW: e.target.checked }))
             }
           />
-          {/* <span style={{ color: colorForRisk("LOW"), fontWeight: 700 }}>LOW</span> */}
           <span
             style={{
               background: colorForRisk("LOW"),
@@ -332,9 +297,6 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, MEDIUM: e.target.checked }))
             }
           />
-          {/* <span style={{ color: colorForRisk("MEDIUM"), fontWeight: 700 }}>
-            MEDIUM
-          </span> */}
           <span
             style={{
               background: colorForRisk("MEDIUM"),
@@ -357,7 +319,6 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, HIGH: e.target.checked }))
             }
           />
-          {/* <span style={{ color: colorForRisk("HIGH"), fontWeight: 700 }}>HIGH</span> */}
           <span
             style={{
               background: colorForRisk("HIGH"),
@@ -380,9 +341,6 @@ export default function RiskMapPage() {
               setRiskEnabled((p) => ({ ...p, EMERGENCY: e.target.checked }))
             }
           />
-          {/* <span style={{ color: colorForRisk("EMERGENCY"), fontWeight: 700 }}>
-            EMERGENCY
-          </span> */}
           <span
             style={{
               background: colorForRisk("EMERGENCY"),
@@ -511,42 +469,7 @@ export default function RiskMapPage() {
             overflow: "auto",
           }}
         >
-          {/* <h3 style={{ marginTop: 0 }}>Queue (priority list)</h3> */}
           <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 10 }}>Priority Queue</div>
-
-          <div
-            style={{
-              border: "1px solid #eee",
-              borderRadius: 12,
-              padding: 12,
-              marginBottom: 12,
-              cursor: "pointer",
-              background: "#f9fbff",
-            }}
-          >
-            <div style={{ fontWeight: 700, marginBottom: 6 }}>Weather</div>
-            {weather ? (
-              <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.5 }}>
-                <div>
-                  <b>{weather.condition || "—"}</b>
-                </div>
-                <div>
-                  Temp: {weather.tempC ?? "—"}°C | Humidity:{" "}
-                  {weather.humidity ?? "—"}%
-                </div>
-                <div>
-                  Wind: {weather.windKph ?? "—"} kph
-                </div>
-                <div style={{ fontSize: 12, opacity: 0.7 }}>
-                  Observed: {weather.observedAt || "—"}
-                </div>
-              </div>
-            ) : (
-              <div style={{ fontSize: 13, opacity: 0.8 }}>
-                {weatherError ? weatherError : "Loading weather..."}
-              </div>
-            )}
-          </div>
 
           <div style={{ opacity: 0.8, marginBottom: 10 }}>
             Click a row to zoom.
