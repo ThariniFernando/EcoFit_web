@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 from bson import ObjectId
 from pymongo import ReturnDocument
 
-from database import database
+from database import database, secondary_database
 from services.prediction_trigger import prediction_trigger
 from services.ward_features_builder import rebuild_recent_ward_hourly_features
 
@@ -146,7 +146,7 @@ async def list_complaints(
     skip: int = Query(default=0, ge=0),
     sort: str = Query(default="-createdAt", description="e.g. -createdAt or createdAt"),
 ):
-    coll = database[COLLECTION]
+    coll = secondary_database[COLLECTION]
 
     query: Dict[str, Any] = {}
 
@@ -213,7 +213,7 @@ async def list_complaints(
 
 @router.get("/{id}")
 async def get_complaint(id: str):
-    coll = database[COLLECTION]
+    coll = secondary_database[COLLECTION]
     doc = await coll.find_one({"_id": oid(id)})
     if not doc:
         raise HTTPException(status_code=404, detail="Complaint not found")
@@ -222,7 +222,7 @@ async def get_complaint(id: str):
 
 @router.patch("/{id}/status")
 async def update_complaint_status(id: str, payload: Dict[str, Any]):
-    coll = database[COLLECTION]
+    coll = secondary_database[COLLECTION]
     now = datetime.now(timezone.utc)
 
     new_status = normalize_status(payload.get("status"))

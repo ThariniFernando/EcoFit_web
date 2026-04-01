@@ -2,6 +2,7 @@
 ecofit-municipal-api/.venv/
 .venv/
 venv/
+myenv/
 ecofit-municipal-api/.ecovenv/
 .ecovenv/
 ecovenv/
