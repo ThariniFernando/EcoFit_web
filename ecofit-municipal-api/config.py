@@ -5,3 +5,5 @@ load_dotenv()
 
 MONGO_URL = os.getenv("MONGO_URL")
 DB_NAME = os.getenv("DB_NAME")
+MONGO_URL_SECONDARY = os.getenv("MONGO_URL__SECONDARY")
+DB_NAME_SECONDARY = os.getenv("DB_NAME__SECONDARY")
