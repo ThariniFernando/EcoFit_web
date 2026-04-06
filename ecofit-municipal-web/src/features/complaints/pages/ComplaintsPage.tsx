@@ -100,7 +100,7 @@ export default function ComplaintsPage() {
       setItems(Array.isArray(res.items) ? res.items : []);
       setTotal(typeof res.total === "number" ? res.total : 0);
 
-      console.log("Complaints loaded:", res.items);
+      
     } catch (e: any) {
       setError(e?.message || "Failed to load complaints");
     } finally {

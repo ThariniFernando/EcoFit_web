@@ -4,6 +4,7 @@ import AppShell from "./layout/AppShell";
 import SignInPage from "../features/auth/pages/SignInPage";
 import SignUpPage from "../features/auth/pages/SignUpPage";
 
+import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import RiskMapPage from "../features/predictions/pages/RiskMapPage";
 import ActionPlanPage from "../features/operations/pages/ActionPlanPage";
 import ServiceLogsPage from "../features/serviceLogs/pages/ServiceLogsPage";
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
     path: "/",
     element: <AppShell />,
     children: [
+      { path: "dashboard", element: <DashboardPage /> },
       { path: "risk-map", element: <RiskMapPage /> },
       { path: "action-plan", element: <ActionPlanPage /> },
       { path: "service-logs", element: <ServiceLogsPage /> },

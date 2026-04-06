@@ -1,5 +1,11 @@
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from routers.alerts_router import router as alerts_router
 from routers.complaints_router import router as complaints_router
@@ -14,17 +20,31 @@ from routers.wards_router import router as wards_router
 from routers.weather_hourly_router import router as weather_hourly_router
 from routers.auth_router import router as auth_router
 
-# add this only if you actually have routers/weather_router.py
-# from routers.weather_router import router as weather_router
 
-app = FastAPI(title="EcoFit Municipal API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    missing = [k for k in ("MONGO_URL", "DB_NAME", "JWT_SECRET") if not os.getenv(k)]
+    if missing:
+        raise RuntimeError(f"Missing required environment variables: {missing}")
+
+    from database import client
+    await client.admin.command("ping")
+    print("✅ MongoDB connected")
+
+    yield
+
+    client.close()
+    print("✅ MongoDB connection closed")
+
+
+app = FastAPI(title="EcoFit Municipal API", lifespan=lifespan)
+
+_raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+cors_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,8 +63,6 @@ app.include_router(wards_router)
 app.include_router(weather_hourly_router)
 app.include_router(auth_router)
 
-# include this if the frontend expects /api/v1/weather/current
-# app.include_router(weather_router)
 
 @app.get("/")
 def root():

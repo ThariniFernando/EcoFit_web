@@ -253,7 +253,7 @@ def make_continuous(df_sparse: pd.DataFrame) -> pd.DataFrame:
     min_t = df_sparse["tsHour"].min()
     max_t = df_sparse["tsHour"].max()
 
-    full_time = pd.date_range(start=min_t, end=max_t, freq="H", tz="UTC")
+    full_time = pd.date_range(start=min_t, end=max_t, freq="h", tz="UTC")
     wards = sorted(df_sparse["wardId"].dropna().unique().tolist())
 
     feature_cols = [c for c in df_sparse.columns if c not in ["wardId", "tsHour"]]
