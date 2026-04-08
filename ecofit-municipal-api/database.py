@@ -1,22 +1,21 @@
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import MONGO_URL, DB_NAME, MONGO_URL_SECONDARY, DB_NAME_SECONDARY
-from dotenv import load_dotenv
 
-
-client = AsyncIOMotorClient(MONGO_URL)
-secondary_client = AsyncIOMotorClient(MONGO_URL_SECONDARY)
-
-database = client[DB_NAME]
-secondary_database = secondary_client[DB_NAME_SECONDARY]
-
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
-
-MONGO_URL = os.getenv("MONGO_URL")
-DB_NAME   = os.getenv("DB_NAME")
-
+# Validate required env vars before any connection attempt
 if not MONGO_URL:
-    raise RuntimeError("MONGO_URL is not set — check your .env file")
+    raise RuntimeError("MONGO_URL is not set — check your environment variables or .env file")
+if not DB_NAME:
+    raise RuntimeError("DB_NAME is not set — check your environment variables or .env file")
+if not MONGO_URL_SECONDARY:
+    raise RuntimeError("MONGO_URL_SECONDARY is not set — check your environment variables or .env file")
+if not DB_NAME_SECONDARY:
+    raise RuntimeError("DB_NAME_SECONDARY is not set — check your environment variables or .env file")
 
-client   = AsyncIOMotorClient(MONGO_URL)
+# Primary database
+client = AsyncIOMotorClient(MONGO_URL)
 database = client[DB_NAME]
+
+# Secondary database (separate real connection)
+secondary_client = AsyncIOMotorClient(MONGO_URL_SECONDARY)
+secondary_database = secondary_client[DB_NAME_SECONDARY]

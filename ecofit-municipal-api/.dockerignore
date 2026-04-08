@@ -1,0 +1,13 @@
+.venv/
+venv/
+myenv/
+.ecovenv/
+ecovenv/
+__pycache__/
+*.pyc
+.env
+.git
+.vscode
+.idea
+.DS_Store
+README.md

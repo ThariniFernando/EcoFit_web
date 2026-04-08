@@ -66,7 +66,7 @@ export default function QuickNav() {
     };
 
     load();
-    const interval = setInterval(load, 30000);
+    const interval = setInterval(load, 120000); // poll every 2 minutes
     return () => clearInterval(interval);
   }, [location.pathname]);
 
