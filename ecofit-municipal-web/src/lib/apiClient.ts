@@ -1,17 +1,28 @@
-// src/lib/apiClient.ts
 import axios from "axios";
-
-const baseURL = import.meta.env.VITE_API_BASE_URL;
-
-if (!baseURL) {
-  // helps you catch env mistakes early
-  console.warn("VITE_API_BASE_URL is missing. Check your .env file.");
-}
+import { getToken } from "../features/auth/api/authApi";
 
 export const apiClient = axios.create({
-  baseURL: baseURL || "http://127.0.0.1:8000", // fallback
-  timeout: 20000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000",
+  timeout: 30000,
 });
+
+// Attach JWT token to every request automatically
+apiClient.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// If the server returns 401, clear the token
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);

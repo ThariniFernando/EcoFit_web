@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query
 from typing import Dict, Any, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
 from database import database
 
 router = APIRouter(prefix="/api/v1/weather-hourly", tags=["Weather"])
@@ -24,19 +25,14 @@ def json_safe(doc: Dict[str, Any]):
 async def get_weather(hours: int = Query(default=48, ge=1, le=168)):
     coll = database[COLLECTION]
 
-    now = datetime.utcnow()
+    # FIX: timezone-aware datetime to match stored documents
+    now = datetime.now(timezone.utc)
     start_time = now - timedelta(hours=hours)
 
-    query = {"tsHour": {"$gte": start_time}}
-
-    cursor = coll.find(query).sort("tsHour", 1)
+    cursor = coll.find({"tsHour": {"$gte": start_time}}).sort("tsHour", 1)
 
     items: List[Dict[str, Any]] = []
     async for doc in cursor:
         items.append(json_safe(doc))
 
-    return {
-        "hours": hours,
-        "count": len(items),
-        "items": items
-    }
+    return {"hours": hours, "count": len(items), "items": items}

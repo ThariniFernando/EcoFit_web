@@ -52,6 +52,10 @@ export default function Sidebar() {
         <NavLink to="/weather-hourly" style={({ isActive }) => linkStyle(isActive)}>
           Weather Hourly
         </NavLink>
+
+        <NavLink to="/knowledge-base" style={({ isActive }) => linkStyle(isActive)}>
+          Knowledge Base
+        </NavLink>
       </div>
     </div>
   );

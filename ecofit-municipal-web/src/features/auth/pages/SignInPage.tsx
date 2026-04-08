@@ -31,7 +31,7 @@ export default function SignInPage() {
       const res = await signIn({ email, password });
 
       if (res?.message === "Login successful") {
-        navigate("/risk-map");
+        navigate("/dashboard");
       } else {
         setError("Login unsuccessful");
       }

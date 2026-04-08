@@ -1,6 +1,4 @@
-// src/features/operations/api/operationsApi.ts
-
-const BASE_URL = "http://127.0.0.1:8000";
+import { apiClient } from "../../../lib/apiClient";
 
 export type RiskClass = "LOW" | "MEDIUM" | "HIGH" | "EMERGENCY";
 
@@ -66,46 +64,6 @@ export type GenerateActionPlanRequest = {
   depotName?: string;
 };
 
-type BackendRouteLeg = {
-  distanceM?: number | null;
-  durationS?: number | null;
-  mode?: "OSRM" | "Fallback";
-};
-
-type BackendRouteStop = {
-  stopNo: number;
-  wardId: string;
-  wardName?: string | null;
-  lat: number;
-  lng: number;
-  riskClass: RiskClass;
-  riskScore: number;
-  priorityScore?: number | null;
-  boostReason?: string | null;
-  leg?: BackendRouteLeg | null;
-};
-
-type BackendCrewPlan = {
-  crewNo: number;
-  depot: { name: string; lat: number; lng: number };
-  stops: BackendRouteStop[];
-  polyline?: Array<[number, number]> | null;
-  trucksAllocated?: number;
-  workersAllocated?: number;
-  demandScore?: number;
-};
-
-type BackendActionPlanResponse = {
-  tsPrediction?: string | null;
-  strategy?: string;
-  totalStops?: number;
-  crews?: number;
-  recommendedCrewCount?: number;
-  recommendedTrucksPerCrew?: number;
-  recommendedWorkersPerCrew?: number;
-  crewPlans?: BackendCrewPlan[];
-};
-
 function safeArray<T>(x: unknown): T[] {
   return Array.isArray(x) ? (x as T[]) : [];
 }
@@ -117,23 +75,15 @@ function safeNum(x: unknown, fallback = 0): number {
 export async function generateActionPlan(
   payload: GenerateActionPlanRequest
 ): Promise<ActionPlanResponse> {
-  const res = await fetch(`${BASE_URL}/api/v1/operations/action-plan`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const res = await apiClient.post("/api/v1/operations/action-plan", payload, {
+  timeout: 120000,
+});
+  const raw = res.data;
 
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(txt || `HTTP ${res.status}`);
-  }
-
-  const raw = (await res.json()) as BackendActionPlanResponse;
-
-  const crewPlans: CrewPlan[] = safeArray<BackendCrewPlan>(raw.crewPlans).map((c) => ({
+  const crewPlans: CrewPlan[] = safeArray<any>(raw.crewPlans).map((c) => ({
     crewNo: safeNum(c.crewNo, 1),
     depot: c.depot || { name: "Depot (Town Hall)", lat: 6.9271, lng: 79.8612 },
-    stops: safeArray<BackendRouteStop>(c.stops).map((s) => ({
+    stops: safeArray<any>(c.stops).map((s) => ({
       stopNo: safeNum(s.stopNo, 0),
       wardId: s.wardId,
       wardName: s.wardName,

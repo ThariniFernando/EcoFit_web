@@ -39,6 +39,22 @@ class LSTMInference:
         self.model.to(self.device)
         self.model.eval()
 
+    @staticmethod
+    def _clean_numpy_array(arr: np.ndarray) -> np.ndarray:
+        return np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+
+    @staticmethod
+    def _normalize_probs(probs: np.ndarray) -> np.ndarray:
+        probs = np.nan_to_num(probs, nan=0.0, posinf=0.0, neginf=0.0)
+        total = float(probs.sum())
+
+        if total <= 0.0:
+            fallback = np.zeros(len(ID_TO_LABEL), dtype=np.float32)
+            fallback[0] = 1.0
+            return fallback
+
+        return (probs / total).astype(np.float32)
+
     @torch.no_grad()
     def predict_from_docs(self, docs: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -58,7 +74,6 @@ class LSTMInference:
 
         df["tsHour"] = pd.to_datetime(df["tsHour"], utc=True, errors="coerce")
         df = df.dropna(subset=["tsHour"]).sort_values("tsHour")
-
         df = df.tail(HISTORY_LEN)
 
         if len(df) < HISTORY_LEN:
@@ -74,14 +89,27 @@ class LSTMInference:
         if missing:
             raise ValueError(f"Missing feature columns in docs: {missing}")
 
+        for col in self.feature_cols:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+        df[self.feature_cols] = df[self.feature_cols].replace([np.inf, -np.inf], np.nan)
+        df[self.feature_cols] = df[self.feature_cols].fillna(0.0)
+
         X = df[self.feature_cols].to_numpy(dtype=np.float32)
         X = X.reshape(1, HISTORY_LEN, -1)
+
         X = apply_scaler(X, self.scaler)
+        X = self._clean_numpy_array(X)
 
         xb = torch.tensor(X, dtype=torch.float32).to(self.device)
         logits = self.model(xb)
 
-        probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
+        logits_np = logits.detach().cpu().numpy()
+        logits_np = self._clean_numpy_array(logits_np)
+
+        probs = torch.softmax(torch.tensor(logits_np, dtype=torch.float32), dim=1).cpu().numpy()[0]
+        probs = self._normalize_probs(probs)
+
         pred_id = int(np.argmax(probs))
 
         return {
@@ -154,6 +182,13 @@ class LSTMInference:
                 pred = self.predict_from_docs(docs)
                 pred["wardId"] = ward_id
                 results.append(pred)
+
+                print(
+                    f"WARD={ward_id} "
+                    f"riskClass={pred['riskClass']} "
+                    f"riskScore={pred['riskScore']:.4f} "
+                    f"probs={pred['probabilities']}"
+                )
 
             except Exception as e:
                 skipped.append({"wardId": ward_id, "reason": str(e)})
