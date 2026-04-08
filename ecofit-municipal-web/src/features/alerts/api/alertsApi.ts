@@ -1,6 +1,4 @@
-// src/features/alerts/api/alertsApi.ts
-
-const BASE_URL = "http://127.0.0.1:8000";
+import { apiClient } from "../../../lib/apiClient";
 
 export type RiskClass = "LOW" | "MEDIUM" | "HIGH" | "EMERGENCY";
 
@@ -31,39 +29,23 @@ export type AlertItem = {
   createdAt: string;
 };
 
-// ✅ MUST be named exactly createAlert
-export async function createAlert(payload: CreateAlertPayload): Promise<AlertItem> {
-  const res = await fetch(`${BASE_URL}/api/v1/alerts/create`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(txt || `HTTP ${res.status}`);
-  }
-
-  return await res.json();
+export async function createAlert(
+  payload: CreateAlertPayload
+): Promise<AlertItem> {
+  const res = await apiClient.post("/api/v1/alerts/create", payload);
+  return res.data;
 }
 
 export async function fetchLatestAlerts(limit = 50): Promise<AlertItem[]> {
-  const res = await fetch(`${BASE_URL}/api/v1/alerts/latest?limit=${limit}`);
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(txt || `HTTP ${res.status}`);
-  }
-  return await res.json();
+  const res = await apiClient.get("/api/v1/alerts/latest", {
+    params: { limit },
+  });
+  return res.data;
 }
 
-export async function closeAlert(alertId: string): Promise<{ ok: boolean; message: string }> {
-  const res = await fetch(`${BASE_URL}/api/v1/alerts/close/${alertId}`, {
-    method: "POST",
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(txt || `HTTP ${res.status}`);
-  }
-  return await res.json();
+export async function closeAlert(
+  alertId: string
+): Promise<{ ok: boolean; message: string }> {
+  const res = await apiClient.post(`/api/v1/alerts/close/${alertId}`);
+  return res.data;
 }

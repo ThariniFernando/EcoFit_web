@@ -1,27 +1,15 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Any
 from datetime import datetime
-import os
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-from pymongo import MongoClient
-from dotenv import load_dotenv
+from bson import ObjectId
 
-load_dotenv()
+from database import database
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["alerts"])
 
-MONGO_URL = os.getenv("MONGO_URL")
-DB_NAME = os.getenv("DB_NAME", "ecofit_db")
-
-ALERTS_COL = os.getenv("ALERTS_COL", "alerts")
-
-
-def get_db():
-    if not MONGO_URL:
-        raise RuntimeError("MONGO_URL missing in .env")
-    client = MongoClient(MONGO_URL)
-    return client[DB_NAME]
+ALERTS_COL = "alerts"
 
 
 def iso(dt: Any) -> Optional[str]:
@@ -32,9 +20,9 @@ def iso(dt: Any) -> Optional[str]:
     return str(dt)
 
 
-# -----------------------------
+# ---------------------------------------------------------------------------
 # Schemas
-# -----------------------------
+# ---------------------------------------------------------------------------
 class CreateAlertRequest(BaseModel):
     wardId: str
     wardName: Optional[str] = None
@@ -43,8 +31,6 @@ class CreateAlertRequest(BaseModel):
     tsPrediction: Optional[str] = None
     lat: Optional[float] = None
     lng: Optional[float] = None
-
-    # optional message fields
     title: Optional[str] = None
     description: Optional[str] = None
 
@@ -64,22 +50,16 @@ class AlertItem(BaseModel):
     createdAt: str
 
 
-# -----------------------------
+# ---------------------------------------------------------------------------
 # Routes
-# -----------------------------
+# ---------------------------------------------------------------------------
 @router.get("/health")
 def health():
     return {"status": "alerts router ok", "ts": datetime.utcnow().isoformat()}
 
 
 @router.post("/create", response_model=AlertItem)
-def create_alert(payload: CreateAlertRequest):
-    """
-    Create an alert from a selected ward (usually EMERGENCY/HIGH).
-    Stored in MongoDB alerts collection.
-    """
-    db = get_db()
-
+async def create_alert(payload: CreateAlertRequest):
     doc = {
         "wardId": payload.wardId,
         "wardName": payload.wardName,
@@ -95,26 +75,19 @@ def create_alert(payload: CreateAlertRequest):
         "createdAt": datetime.utcnow(),
     }
 
-    res = db[ALERTS_COL].insert_one(doc)
+    res = await database[ALERTS_COL].insert_one(doc)
     doc["_id"] = str(res.inserted_id)
     doc["createdAt"] = iso(doc["createdAt"])
     return doc
 
 
 @router.get("/latest", response_model=List[AlertItem])
-def latest(limit: int = 50):
-    """
-    Returns most recent alerts.
-    """
-    db = get_db()
-    cur = (
-        db[ALERTS_COL]
-        .find({}, sort=[("createdAt", -1)])
-        .limit(max(1, min(int(limit), 500)))
-    )
+async def latest(limit: int = 50):
+    limit = max(1, min(int(limit), 500))
+    cursor = database[ALERTS_COL].find({}, sort=[("createdAt", -1)]).limit(limit)
 
     out = []
-    for d in cur:
+    async for d in cursor:
         d["_id"] = str(d["_id"])
         d["createdAt"] = iso(d.get("createdAt"))
         out.append(d)
@@ -122,13 +95,9 @@ def latest(limit: int = 50):
 
 
 @router.post("/close/{alert_id}")
-def close_alert(alert_id: str):
-    """
-    Mark alert as CLOSED.
-    """
-    db = get_db()
-    res = db[ALERTS_COL].update_one(
-        {"_id": __import__("bson").ObjectId(alert_id)},
+async def close_alert(alert_id: str):
+    res = await database[ALERTS_COL].update_one(
+        {"_id": ObjectId(alert_id)},
         {"$set": {"status": "CLOSED", "closedAt": datetime.utcnow()}},
     )
     if res.matched_count == 0:
