@@ -1,84 +1,47 @@
-const API_BASE_ENGLISH = "http://localhost:8000/api/v1/english_docs";
-const API_BASE_SINHALA = "http://localhost:8000/api/v1/sinhala_docs";
+import { apiClient } from "../../lib/apiClient";
 
 // ── English ─────────────────────────────────────────────────────────
 
 export async function getEnglishDocuments() {
-  const res = await fetch(`${API_BASE_ENGLISH}/documents`);
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch English documents");
-  }
-
-  return res.json();
+  const res = await apiClient.get("/api/v1/english_docs/documents");
+  return res.data;
 }
 
 export async function uploadEnglishDocument(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE_ENGLISH}/upload`, {
-    method: "POST",
-    body: formData
+  const res = await apiClient.post("/api/v1/english_docs/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
-
-  if (!res.ok) {
-    throw new Error("English upload failed");
-  }
-
-  return res.json();
+  return res.data;
 }
 
 export async function deleteEnglishDocument(docId: string) {
-  const res = await fetch(`${API_BASE_ENGLISH}/documents/${docId}`, {
-    method: "DELETE"
-  });
-
-  if (!res.ok) {
-    throw new Error("English delete failed");
-  }
-
-  return res.json();
+  const res = await apiClient.delete(`/api/v1/english_docs/documents/${docId}`);
+  return res.data;
 }
 
 // ── Sinhala ─────────────────────────────────────────────────────────
 
 export async function getSinhalaDocuments() {
-  const res = await fetch(`${API_BASE_SINHALA}/documents`);
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch Sinhala documents");
-  }
-
-  return res.json();
+  const res = await apiClient.get("/api/v1/sinhala_docs/documents");
+  return res.data;
 }
 
 export async function uploadSinhalaDocument(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE_SINHALA}/upload`, {
-    method: "POST",
-    body: formData
+  const res = await apiClient.post("/api/v1/sinhala_docs/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
-
-  if (!res.ok) {
-    throw new Error("Sinhala upload failed");
-  }
-
-  return res.json();
+  return res.data;
 }
 
 export async function deleteSinhalaDocument(docId: string) {
-  const res = await fetch(`${API_BASE_SINHALA}/documents/${docId}`, {
-    method: "DELETE"
-  });
-
-  if (!res.ok) {
-    throw new Error("Sinhala delete failed");
-  }
-
-  return res.json();
+  const res = await apiClient.delete(`/api/v1/sinhala_docs/documents/${docId}`);
+  return res.data;
 }
 
 // ── Backward-compatible aliases (English) ───────────────────────────
