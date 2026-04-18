@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Modal from "../../../components/common/Modal";
 import NewTripForm from "../components/NewTripForm";
